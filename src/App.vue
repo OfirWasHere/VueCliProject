@@ -1,26 +1,55 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <Navbar
+    :pages="pages"
+    :active-page="activePage"
+  ></Navbar>
+
+  <RouterView></RouterView>
+  
+  <!-- prevent crash with if -->
+  <!-- <page-viewer v-if="pages.length > 0" :page="pages[activePage]"> </page-viewer> -->
+
+  <!-- Page created event, we use emit to push the event back to parent component -->
+  <!-- <CreatePage @page-created="pageCreated"></CreatePage> -->
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import PageViewer from "./components/PageViewer.vue";
+import Navbar from "./components/Navbar.vue";
+import CreatePage from "./components/CreatePage.vue"
 export default {
-  name: 'App',
   components: {
-    HelloWorld
-  }
-}
+    PageViewer,
+    Navbar,
+    CreatePage
+  },
+
+  created() {
+    this.getPages();
+    // Bus object listen to navbar and then we set the active page to the index
+    this.$bus.$on('NavbarLinkActivated', (index) => {
+      this.activePage = index
+    })
+  },
+
+  data() {
+    return {
+      activePage: 0,
+      pages: [],
+    };
+  },
+  methods: {
+    async getPages() {
+      let response = await fetch("pages.json");
+      let data = await response.json();
+
+      this.pages = data;
+    },
+    pageCreated(pageObj) {
+      this.pages.push(pageObj)
+    }
+  },
+};
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
+<style></style>
